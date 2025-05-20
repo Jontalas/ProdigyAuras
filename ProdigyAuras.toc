@@ -5,6 +5,10 @@
 ## Notes: Intelligent rotation assistant and utility addon. |cffeda55fProdigyAuras|r
 ## SavedVariables: ProdigyAurasDB
 
+## Locale files - LOAD THESE FIRST
+Locales/esES.lua
+Locales/enUS.lua
+
 ## Core files
 Core/Core.lua
 Core/Events.lua
@@ -22,7 +26,3 @@ Core/Utils.lua
 # Modules/Utilities/ConsumableReminder.lua
 # Modules/Utilities/TalentReminder.lua
 # Modules/Integrations/BigWigsListener.lua
-
-# Locales (inicialmente comentados)
-# Locales/enUS.lua
-# Locales/esES.lua

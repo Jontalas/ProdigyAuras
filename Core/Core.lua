@@ -4,7 +4,41 @@
 
 ProdigyAuras = ProdigyAuras or {}
 local addon = ProdigyAuras
-local ADDON_NAME = "ProdigyAuras" -- Must match .toc filename and folder name
+local ADDON_NAME = "ProdigyAuras"
+
+-- Localization Setup
+addon.currentLocale = GetLocale()
+addon.defaultLocale = "enUS" -- <<< CHANGED: Default locale is now English
+addon.L_DATA = addon.L_DATA or {} -- This should be populated by Locale files
+
+function addon:L(key, ...)
+    local langDataToUse -- This will hold the chosen language's data table
+
+    -- 1. Try the game's current locale if we have a translation for it (e.g., esES)
+    if self.L_DATA[self.currentLocale] then
+        langDataToUse = self.L_DATA[self.currentLocale]
+    else
+        -- 2. Otherwise, fall back to our defined default locale (which is now enUS)
+        langDataToUse = self.L_DATA[self.defaultLocale]
+    end
+
+    -- 3. Ensure langDataToUse is a table, even if a locale file was somehow missing
+    langDataToUse = langDataToUse or {}
+
+    local localizedString = langDataToUse[key]
+
+    if localizedString then
+        if select("#", ...) > 0 then
+            return string.format(localizedString, ...)
+        else
+            return localizedString
+        end
+    else
+        -- If the key is STILL not found (i.e., missing from the chosen langData),
+        -- then it's a genuine missing localization key.
+        return "LOC_ERR: " .. key 
+    end
+end
 
 -- Initialize basic properties
 addon.title = ADDON_NAME
@@ -14,27 +48,31 @@ addon.isInitialized = false
 addon.isEnabled = false
 addon.metadataInitialized = false
 
--- Debug print function
-function addon:DebugPrint(message)
-    print(ADDON_NAME .. ": " .. tostring(message))
+-- Debug print function (its logic for deciding to localize or print raw remains the same)
+function addon:DebugPrint(messageKey, ...)
+    if self.L_DATA and (self.L_DATA[self.currentLocale] and self.L_DATA[self.currentLocale][messageKey] or 
+                       self.L_DATA[self.defaultLocale] and self.L_DATA[self.defaultLocale][messageKey]) then 
+                       -- Note: The check for self.L_DATA["enUS"] specifically is covered if defaultLocale is enUS
+        print(ADDON_NAME .. ": " .. self:L(messageKey, ...))
+    else
+        print(ADDON_NAME .. ": " .. tostring(messageKey)) 
+    end
 end
+
 
 local function InitializeMetadata()
     if addon.metadataInitialized then return end
 
-    -- addon:DebugPrint("Attempting to initialize metadata (WoW 11.1.5)...") -- Kept for deeper debugging if needed
-
     local getMetadataFunc
     if C_AddOns and C_AddOns.GetAddOnMetadata then
         getMetadataFunc = C_AddOns.GetAddOnMetadata
-        -- addon:DebugPrint("Using C_AddOns.GetAddOnMetadata.") -- Kept for deeper debugging
     else
         getMetadataFunc = GetAddOnMetadata 
-        addon:DebugPrint("Warning: C_AddOns.GetAddOnMetadata not found. Attempting global GetAddOnMetadata (not recommended for 11.1.5).")
+        addon:DebugPrint("L_WARN_C_ADDONS_NOT_FOUND", "11.1.5") -- Uses self:L, which respects new default
     end
 
     if not getMetadataFunc then
-        addon:DebugPrint("Critical Error: No GetAddOnMetadata function available.")
+        addon:DebugPrint("L_ERR_NO_GETMETADATA_FUNC")
         addon.metadataInitialized = true
         return
     end
@@ -46,55 +84,62 @@ local function InitializeMetadata()
     if successVersion and versionOrError then
         addon.version = versionOrError
     else
-        addon:DebugPrint("Warning: Could not retrieve addon Version.")
-        if not successVersion then addon:DebugPrint("pcall error (Version): " .. tostring(versionOrError)) end
+        addon:DebugPrint("L_WARN_GET_VERSION_FAILED")
+        if not successVersion then addon:DebugPrint("L_PCALL_ERROR", "Version", tostring(versionOrError)) end
     end
 
     if successTitle and titleOrError then
         addon.title = titleOrError
     else
-        addon:DebugPrint("Warning: Could not retrieve addon Title.")
-        if not successTitle then addon:DebugPrint("pcall error (Title): " .. tostring(titleOrError)) end
+        addon:DebugPrint("L_WARN_GET_TITLE_FAILED")
+        if not successTitle then addon:DebugPrint("L_PCALL_ERROR", "Title", tostring(titleOrError)) end
     end
     
     if successAuthor and authorOrError then
         addon.author = authorOrError
     else
-        addon:DebugPrint("Warning: Could not retrieve addon Author.")
-         if not successAuthor then addon:DebugPrint("pcall error (Author): " .. tostring(authorOrError)) end
+        addon:DebugPrint("L_WARN_GET_AUTHOR_FAILED")
+         if not successAuthor then addon:DebugPrint("L_PCALL_ERROR", "Author", tostring(authorOrError)) end
     end
 
-    addon:DebugPrint("Metadata initialized. Version: " .. addon.version) -- Simplified confirmation
+    addon:DebugPrint("L_METADATA_INITIALIZED", addon.version)
     addon.metadataInitialized = true
 end
 
 function addon:Initialize()
     if self.isInitialized then return end
-    self:DebugPrint(self.title .. " initializing (core logic)...")
+    self:DebugPrint("L_CORE_LOGIC_INITIALIZING", self.title)
     self.isInitialized = true
-    self:DebugPrint(self.title .. " core logic initialized.")
+    self:DebugPrint("L_CORE_LOGIC_INITIALIZED", self.title)
 end
 
 function addon:Enable()
     if self.isEnabled then return end
-    self:DebugPrint(self.title .. " enabling...")
-    
+    self:DebugPrint("L_ENABLING_ADDON", self.title)
+
+    if self.UpdatePlayerInfo then
+        self:UpdatePlayerInfo()
+    end
+
     SLASH_PRODIGYAURAS1 = "/prodigyauras"
     SLASH_PRODIGYAURAS2 = "/pa"
     SlashCmdList["PRODIGYAURAS"] = function(msg, editBox)
         msg = string.lower(msg or "")
         if msg == "test" then
-            ProdigyAuras:DebugPrint("Comando de prueba recibido!")
+            ProdigyAuras:DebugPrint("L_CMD_TEST_RECEIVED")
+            if ProdigyAuras.GetPlayerInfo then
+                 ProdigyAuras:DebugPrint("L_CURRENT_CLASS_SPEC_INFO", ProdigyAuras:GetPlayerInfo("className") or "N/A", ProdigyAuras:GetPlayerInfo("specId") or "N/A")
+            end
         elseif msg == "config" then
-            ProdigyAuras:DebugPrint("Abriendo configuración (aún no implementado)...")
+            ProdigyAuras:DebugPrint("L_CMD_CONFIG_WIP")
         elseif msg == "version" then
-            ProdigyAuras:DebugPrint("Versión: " .. ProdigyAuras.version .. ", Autor: " .. ProdigyAuras.author .. ", Título: " .. ProdigyAuras.title)
+            ProdigyAuras:DebugPrint("L_CMD_VERSION_INFO", ProdigyAuras.version, ProdigyAuras.author, ProdigyAuras.title)
         else
-            ProdigyAuras:DebugPrint("Comando desconocido. Comandos disponibles: /pa test, /pa config, /pa version")
+            ProdigyAuras:DebugPrint("L_CMD_UNKNOWN")
         end
     end
     
-    self:DebugPrint(self.title .. " enabled.")
+    self:DebugPrint("L_ADDON_ENABLED", self.title)
     self.isEnabled = true
 end
 
@@ -102,18 +147,16 @@ local mainFrame = CreateFrame("Frame")
 mainFrame:SetScript("OnEvent", function(selfFrame, event, arg1, ...)
     if event == "ADDON_LOADED" then
         if arg1 == ADDON_NAME then
-            -- Initial ADDON_LOADED for self is a good point to know the file is processed
-            -- but most initialization happens at PLAYER_ENTERING_WORLD.
-            -- ProdigyAuras:DebugPrint("Event: ADDON_LOADED for " .. arg1) -- Removed for cleaner console
+            -- print(ADDON_NAME .. " ADDON_LOADED event for self.")
         end
     elseif event == "PLAYER_ENTERING_WORLD" then 
-        -- ProdigyAuras:DebugPrint("Event: PLAYER_ENTERING_WORLD") -- Removed for cleaner console
-        
         if not ProdigyAuras.metadataInitialized then
              InitializeMetadata()
         end
 
-        ProdigyAuras:InitializeDB() -- Initialize the configuration database
+        if ProdigyAuras.InitializeDB then
+            ProdigyAuras:InitializeDB()
+        end
 
         if not ProdigyAuras.isInitialized then
             ProdigyAuras:Initialize()
@@ -127,6 +170,4 @@ mainFrame:SetScript("OnEvent", function(selfFrame, event, arg1, ...)
 end)
 
 mainFrame:RegisterEvent("ADDON_LOADED")
-mainFrame:RegisterEvent("PLAYER_ENTERING_WORLD") 
-
--- ProdigyAuras:DebugPrint("Core.lua procesado y eventos registrados.") -- Removed for cleaner console
+mainFrame:RegisterEvent("PLAYER_ENTERING_WORLD")

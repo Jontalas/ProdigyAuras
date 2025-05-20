@@ -4,63 +4,44 @@
 
 ProdigyAuras = ProdigyAuras or {}
 local addon = ProdigyAuras
-local ADDON_NAME = "ProdigyAuras"
+-- local ADDON_NAME = "ProdigyAuras" -- No longer needed directly here for DebugPrint prefix
 
--- This table will hold the default settings for the addon.
--- We'll structure it thinking about future options.
 addon.defaultSettings = {
-    global = { -- Settings that apply across all characters
+    global = {
         firstRun = true,
-        -- exampleGlobalSetting = "defaultValue",
     },
-    profile = { -- Settings that can be character-specific or profile-specific
+    profile = {
         enabled = true,
         showRotationHelper = true,
         iconScale = 1.0,
         iconAlpha = 1.0,
-        -- exampleProfileSetting = 123,
-        position = { x = 0, y = 200 }, -- Default position for main display elements
+        position = { x = 0, y = 200 },
     }
 }
 
--- This is our main database table, declared in ProdigyAuras.toc as ## SavedVariables: ProdigyAurasDB
--- WoW will automatically save this table's contents for us.
--- We will initialize it as character-specific by default.
 ProdigyAurasDB = ProdigyAurasDB or {}
 
--- Function to initialize the character's settings if they don't exist
 function addon:InitializeDB()
     if not ProdigyAurasDB.global then
         ProdigyAurasDB.global = {}
-        -- Deep copy default global settings
         for k, v in pairs(self.defaultSettings.global) do
             ProdigyAurasDB.global[k] = v
         end
-        self:DebugPrint("Global settings initialized with defaults.")
+        self:DebugPrint("L_GLOBAL_SETTINGS_INITIALIZED")
     end
 
-    -- For character-specific settings, we'll store them under a key, e.g., character's name.
-    -- However, WoW's SavedVariables can be set to be "per character" directly in the .toc
-    -- by using ## SavedVariablesPerCharacter: ProdigyAurasDB_Character
-    -- For simplicity now, we'll assume ProdigyAurasDB itself is loaded per character if
-    -- that's the desired default. If it's global, we need a sub-table for current char.
-
-    -- Let's assume ProdigyAurasDB is loaded per-character by default in modern WoW if not specified as global.
-    -- If it's the first time for this character (or settings are wiped):
     if not ProdigyAurasDB.profile then
         ProdigyAurasDB.profile = {}
-        -- Deep copy default profile settings
         for k, v in pairs(self.defaultSettings.profile) do
             if type(v) == "table" then
-                ProdigyAurasDB.profile[k] = self:DeepCopyTable(v) -- Need a deep copy for tables
+                ProdigyAurasDB.profile[k] = self:DeepCopyTable(v)
             else
                 ProdigyAurasDB.profile[k] = v
             end
         end
-        self:DebugPrint("Profile settings for this character initialized with defaults.")
-        ProdigyAurasDB.global.firstRun = false -- Mark that at least one profile has been set up.
+        self:DebugPrint("L_PROFILE_SETTINGS_INITIALIZED")
+        ProdigyAurasDB.global.firstRun = false
     else
-        -- Ensure all default keys exist in the current profile (for when new settings are added)
         for k, v in pairs(self.defaultSettings.profile) do
             if ProdigyAurasDB.profile[k] == nil then
                 if type(v) == "table" then
@@ -68,14 +49,13 @@ function addon:InitializeDB()
                 else
                     ProdigyAurasDB.profile[k] = v
                 end
-                self:DebugPrint("Added missing default setting '" .. k .. "' to current profile.")
+                self:DebugPrint("L_PROFILE_SETTING_ADDED", k)
             end
         end
     end
-    self:DebugPrint("Database initialized. Addon Enabled: " .. tostring(self:GetSetting("enabled", true))) -- true for profile setting
+    self:DebugPrint("L_DB_INITIALIZED", tostring(self:GetSetting("enabled", true)))
 end
 
--- Utility for deep copying a table (important for default settings)
 function addon:DeepCopyTable(orig)
     local orig_type = type(orig)
     local copy
@@ -85,48 +65,44 @@ function addon:DeepCopyTable(orig)
             copy[self:DeepCopyTable(orig_key)] = self:DeepCopyTable(orig_value)
         end
         setmetatable(copy, self:DeepCopyTable(getmetatable(orig)))
-    else -- number, string, boolean, etc
+    else
         copy = orig
     end
     return copy
 end
 
--- Function to get a setting value
--- Takes the setting name and an optional boolean 'isProfileSetting' (defaults to true)
 function addon:GetSetting(key, isProfileSetting)
-    isProfileSetting = (isProfileSetting == nil) and true or isProfileSetting -- Default to profile setting
+    isProfileSetting = (isProfileSetting == nil) and true or isProfileSetting
 
     if isProfileSetting then
         if ProdigyAurasDB.profile and ProdigyAurasDB.profile[key] ~= nil then
             return ProdigyAurasDB.profile[key]
         elseif self.defaultSettings.profile[key] ~= nil then
-            return self.defaultSettings.profile[key] -- Fallback to default if not in DB
+            return self.defaultSettings.profile[key]
         end
-    else -- Global setting
+    else
         if ProdigyAurasDB.global and ProdigyAurasDB.global[key] ~= nil then
             return ProdigyAurasDB.global[key]
         elseif self.defaultSettings.global[key] ~= nil then
-            return self.defaultSettings.global[key] -- Fallback to default
+            return self.defaultSettings.global[key]
         end
     end
-    self:DebugPrint("Warning: Setting '" .. key .. "' not found in DB or defaults.")
-    return nil -- Setting not found
+    self:DebugPrint("L_WARN_SETTING_NOT_FOUND", key)
+    return nil
 end
 
--- Function to set a setting value
--- Takes the setting name, its value, and an optional boolean 'isProfileSetting'
 function addon:SetSetting(key, value, isProfileSetting)
     isProfileSetting = (isProfileSetting == nil) and true or isProfileSetting
 
     if isProfileSetting then
-        if not ProdigyAurasDB.profile then ProdigyAurasDB.profile = {} end -- Ensure profile table exists
+        if not ProdigyAurasDB.profile then ProdigyAurasDB.profile = {} end
         ProdigyAurasDB.profile[key] = value
-        self:DebugPrint("Profile setting '" .. key .. "' set to: " .. tostring(value))
-    else -- Global setting
-        if not ProdigyAurasDB.global then ProdigyAurasDB.global = {} end -- Ensure global table exists
+        self:DebugPrint("L_PROFILE_SETTING_SET", key, tostring(value))
+    else
+        if not ProdigyAurasDB.global then ProdigyAurasDB.global = {} end
         ProdigyAurasDB.global[key] = value
-        self:DebugPrint("Global setting '" .. key .. "' set to: " .. tostring(value))
+        self:DebugPrint("L_GLOBAL_SETTING_SET", key, tostring(value))
     end
 end
 
-addon:DebugPrint("Config.lua cargado.")
+addon:DebugPrint("L_CONFIG_LOADED")

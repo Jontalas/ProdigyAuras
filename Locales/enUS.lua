@@ -41,4 +41,22 @@ ProdigyAuras.L_DATA["enUS"] = {
     L_PLAYER_INFO_UPDATED = "Player Info Updated: Class=%s (%s), Spec=%s (ID:%s)",
     L_WARN_PLAYER_INFO_KEY_NOT_FOUND = "Warning: Player info key '%s' not found.",
     L_CURRENT_CLASS_SPEC_INFO = "Current Class: %s, Spec ID: %s", -- For /pa test
+
+    -- Events.lua
+    L_EVENTS_LOADED = "Events.lua loaded.",
+    L_EVENT_REGISTERED = "Event '%s' registered.",
+    L_EVENT_PLAYER_SPEC_CHANGED = "Player specialization changed. Updating info...",
+    L_EVENTS_GAME_EVENTS_HANDLER_SET = "Game event handler set for %s.",
+    L_EVENTS_ALL_UNREGISTERED = "All game events unregistered.",
+
+    -- FrameManager.lua
+    L_FRAMEMANAGER_LOADED = "FrameManager.lua loaded.",
+    L_TEST_FRAME_CREATED = "Test frame created.",
+    L_TEST_FRAME_POSITION_UPDATED = "Test frame position updated.",
+    L_TEST_FRAME_VISIBILITY_UPDATED = "Test frame visibility updated to: %s.",
+    L_CMD_TOGGLEFRAME_ENABLED = "Test frame enabled.",
+    L_CMD_TOGGLEFRAME_DISABLED = "Test frame disabled.",
+    LOC_ERR_CREATE_TEST_FRAME_NOT_FOUND = "Error: CreateTestFrame function not found.",
+    LOC_ERR_TOGGLE_TEST_FRAME_NOT_FOUND = "Error: ToggleTestFrame function not found.",
+    LOC_ERR_PROFILE_DB_NOT_INIT_TOGGLE = "Error: Profile DB not initialized for ToggleTestFrame.",
 }

@@ -41,4 +41,22 @@ ProdigyAuras.L_DATA["esES"] = {
     L_PLAYER_INFO_UPDATED = "Info Jugador Actualizada: Clase=%s (%s), Spec=%s (ID:%s)",
     L_WARN_PLAYER_INFO_KEY_NOT_FOUND = "Advertencia: Clave de información del jugador '%s' no encontrada.",
     L_CURRENT_CLASS_SPEC_INFO = "Clase Actual: %s, ID Spec: %s", -- For /pa test
+
+    -- Events.lua
+    L_EVENTS_LOADED = "Events.lua cargado.",
+    L_EVENT_REGISTERED = "Evento '%s' registrado.",
+    L_EVENT_PLAYER_SPEC_CHANGED = "Especialización del jugador cambiada. Actualizando información...",
+    L_EVENTS_GAME_EVENTS_HANDLER_SET = "Manejador de eventos del juego configurado para %s.",
+    L_EVENTS_ALL_UNREGISTERED = "Todos los eventos del juego han sido desregistrados.",
+
+    -- FrameManager.lua
+    L_FRAMEMANAGER_LOADED = "FrameManager.lua cargado.",
+    L_TEST_FRAME_CREATED = "Frame de prueba creado.",
+    L_TEST_FRAME_POSITION_UPDATED = "Posición del frame de prueba actualizada.",
+    L_TEST_FRAME_VISIBILITY_UPDATED = "Visibilidad del frame de prueba actualizada a: %s.",
+    L_CMD_TOGGLEFRAME_ENABLED = "Frame de prueba habilitado.",
+    L_CMD_TOGGLEFRAME_DISABLED = "Frame de prueba deshabilitado.",
+    LOC_ERR_CREATE_TEST_FRAME_NOT_FOUND = "Error: Función CreateTestFrame no encontrada.",
+    LOC_ERR_TOGGLE_TEST_FRAME_NOT_FOUND = "Error: Función ToggleTestFrame no encontrada.",
+    LOC_ERR_PROFILE_DB_NOT_INIT_TOGGLE = "Error: Base de datos del perfil no inicializada para ToggleTestFrame.",
 }

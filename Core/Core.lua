@@ -121,6 +121,16 @@ function addon:Enable()
         self:UpdatePlayerInfo()
     end
 
+    if self.RegisterGameEvents then
+        self:RegisterGameEvents()
+    end
+
+    if self.CreateTestFrame then -- Ensure FrameManager.lua (and this func) is loaded
+        self:CreateTestFrame()
+    else
+        self:DebugPrint("LOC_ERR: CreateTestFrame function not found.") -- Add loc key if needed
+    end
+
     SLASH_PRODIGYAURAS1 = "/prodigyauras"
     SLASH_PRODIGYAURAS2 = "/pa"
     SlashCmdList["PRODIGYAURAS"] = function(msg, editBox)
@@ -132,6 +142,12 @@ function addon:Enable()
             end
         elseif msg == "config" then
             ProdigyAuras:DebugPrint("L_CMD_CONFIG_WIP")
+        elseif msg == "toggleframe" then
+            if ProdigyAuras.ToggleTestFrame then
+                ProdigyAuras:ToggleTestFrame()
+            else
+                ProdigyAuras:DebugPrint("LOC_ERR: ToggleTestFrame function not found.") -- Add loc key
+            end
         elseif msg == "version" then
             ProdigyAuras:DebugPrint("L_CMD_VERSION_INFO", ProdigyAuras.version, ProdigyAuras.author, ProdigyAuras.title)
         else

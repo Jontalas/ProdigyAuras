@@ -15,13 +15,13 @@ Core/Events.lua
 Core/Config.lua
 Core/Utils.lua
 
-# Modules (inicialmente comentados, los descomentaremos a medida que los creemos)
+## Modules
+Modules/Display/FrameManager.lua 
 # Modules/Rotations/RotationEngine.lua
 # Modules/Rotations/SimcParser.lua
 # Modules/Rotations/Classes/Common.lua
 # Modules/Display/IconManager.lua
 # Modules/Display/TextDisplay.lua
-# Modules/Display/FrameManager.lua
 # Modules/Utilities/BuffReminder.lua
 # Modules/Utilities/ConsumableReminder.lua
 # Modules/Utilities/TalentReminder.lua

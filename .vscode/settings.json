@@ -1,0 +1,12 @@
+{
+    "Lua.diagnostics.globals": [
+        "GetLocale",
+        "C_AddOns",
+        "GetAddOnMetadata",
+        "SlashCmdList",
+        "CreateFrame",
+        "UnitClass",
+        "GetSpecialization",
+        "GetSpecializationInfo"
+    ]
+}

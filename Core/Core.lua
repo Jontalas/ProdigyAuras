@@ -1,82 +1,127 @@
 -- ProdigyAuras - Core.lua
 -- Author: Jontalas
--- Version: 0.1.0
+-- Designed for WoW Version 11.1.5 (Interface 110100)
 
--- Create the main addon table if it doesn't exist
 ProdigyAuras = ProdigyAuras or {}
 local addon = ProdigyAuras
-local addonName = "ProdigyAuras" -- Store addon name locally for convenience
+local ADDON_NAME = "ProdigyAuras" -- Must match .toc filename and folder name
 
--- Fetch metadata (can be expanded in Config.lua or Utils.lua later)
-addon.version = GetAddOnMetadata(addonName, "Version") or "0.1.0"
-addon.author = GetAddOnMetadata(addonName, "Author") or "Jontalas"
-addon.title = GetAddOnMetadata(addonName, "Title") or addonName
+-- Initialize basic properties
+addon.title = ADDON_NAME -- Fallback, will be updated from .toc
+addon.version = "0.0.0-pre" -- Fallback, will be updated from .toc
+addon.author = "Jontalas" -- Fallback, will be updated from .toc
+addon.isInitialized = false
+addon.isEnabled = false
+addon.metadataInitialized = false
 
--- Simple debug print function (can be moved to Utils.lua and enhanced)
-local function DebugPrint(message)
-    print(addon.title .. ": " .. tostring(message))
+-- Debug print function
+function addon:DebugPrint(message)
+    print(ADDON_NAME .. ": " .. tostring(message))
 end
-addon.DebugPrint = DebugPrint -- Make it accessible from other files if needed
 
--- Event handler function for ADDON_LOADED
-local function OnAddOnLoaded(self, event, loadedAddonName)
-    if loadedAddonName == addonName then
-        DebugPrint("Addon cargado. Versión: " .. addon.version)
-        DebugPrint("Bienvenido a " .. addon.title .. "! Escribe /pa o /prodigyauras para comandos.")
-        
-        -- Unregister the event after it's fired for our addon
-        self:UnregisterEvent("ADDON_LOADED")
+local function InitializeMetadata()
+    if addon.metadataInitialized then return end
+
+    addon:DebugPrint("Attempting to initialize metadata (WoW 11.1.5)...")
+
+    local getMetadataFunc
+    if C_AddOns and C_AddOns.GetAddOnMetadata then
+        getMetadataFunc = C_AddOns.GetAddOnMetadata
+        addon:DebugPrint("Using C_AddOns.GetAddOnMetadata.")
+    else
+        -- This fallback is unlikely to be needed or work correctly in 11.1.5 if C_AddOns itself is missing.
+        getMetadataFunc = GetAddOnMetadata 
+        addon:DebugPrint("Warning: C_AddOns.GetAddOnMetadata not found. Attempting global GetAddOnMetadata (not recommended for 11.1.5).")
     end
+
+    if not getMetadataFunc then
+        addon:DebugPrint("Critical Error: No GetAddOnMetadata function available.")
+        addon.metadataInitialized = true -- Mark as initialized to prevent retries, but with errors.
+        return
+    end
+
+    local successVersion, versionOrError = pcall(getMetadataFunc, ADDON_NAME, "Version")
+    local successTitle, titleOrError = pcall(getMetadataFunc, ADDON_NAME, "Title")
+    local successAuthor, authorOrError = pcall(getMetadataFunc, ADDON_NAME, "Author")
+
+    if successVersion and versionOrError then
+        addon.version = versionOrError
+    else
+        addon:DebugPrint("Warning: Could not retrieve addon Version.")
+        if not successVersion then addon:DebugPrint("pcall error (Version): " .. tostring(versionOrError)) end
+    end
+
+    if successTitle and titleOrError then
+        addon.title = titleOrError
+    else
+        addon:DebugPrint("Warning: Could not retrieve addon Title.")
+        if not successTitle then addon:DebugPrint("pcall error (Title): " .. tostring(titleOrError)) end
+    end
+    
+    if successAuthor and authorOrError then
+        addon.author = authorOrError
+    else
+        addon:DebugPrint("Warning: Could not retrieve addon Author.")
+         if not successAuthor then addon:DebugPrint("pcall error (Author): " .. tostring(authorOrError)) end
+    end
+
+    addon:DebugPrint("Metadata initialization complete. Version: " .. addon.version .. ", Title: " .. addon.title .. ", Author: " .. addon.author)
+    addon.metadataInitialized = true
 end
 
--- Function to initialize the addon (called on PLAYER_LOGIN)
 function addon:Initialize()
-    DebugPrint("Inicializando " .. addon.title .. "...")
-    -- Initialize other modules here in the future
+    if self.isInitialized then return end
+    self:DebugPrint("Initializing " .. self.title .. " (core logic)...")
+    self.isInitialized = true
+    self:DebugPrint(self.title .. " core logic initialized.")
 end
 
--- Function to enable the addon (called after Initialize)
 function addon:Enable()
-    DebugPrint("Habilitando " .. addon.title .. "...")
+    if self.isEnabled then return end
+    self:DebugPrint("Enabling " .. self.title .. "...")
     
-    -- Create a frame to handle ADDON_LOADED for our specific addon
-    local loadFrame = CreateFrame("Frame")
-    loadFrame:RegisterEvent("ADDON_LOADED")
-    loadFrame:SetScript("OnEvent", OnAddOnLoaded)
-    
-    -- Register slash commands
     SLASH_PRODIGYAURAS1 = "/prodigyauras"
     SLASH_PRODIGYAURAS2 = "/pa"
-    SlashCmdList["PRODIGYAURAS"] = function(msg, editBox) -- Note the correct table for SlashCmdList
-        msg = string.lower(msg or "") -- Ensure msg is a string and lowercase
+    SlashCmdList["PRODIGYAURAS"] = function(msg, editBox)
+        msg = string.lower(msg or "")
         if msg == "test" then
-            DebugPrint("Comando de prueba recibido!")
+            ProdigyAuras:DebugPrint("Comando de prueba recibido!")
         elseif msg == "config" then
-            DebugPrint("Abriendo configuración (aún no implementado)...")
-            -- Future: Code to open config panel will go here
+            ProdigyAuras:DebugPrint("Abriendo configuración (aún no implementado)...")
         elseif msg == "version" then
-            DebugPrint("Versión actual: " .. addon.version)
+            ProdigyAuras:DebugPrint("Versión: " .. ProdigyAuras.version .. ", Autor: " .. ProdigyAuras.author .. ", Título: " .. ProdigyAuras.title)
         else
-            DebugPrint("Comando desconocido. Comandos disponibles: /pa test, /pa config, /pa version")
+            ProdigyAuras:DebugPrint("Comando desconocido. Comandos disponibles: /pa test, /pa config, /pa version")
         end
     end
     
-    DebugPrint(self.title .. " habilitado.")
+    self:DebugPrint(self.title .. " enabled and slash commands registered.")
+    self.isEnabled = true
 end
 
--- Main addon loading sequence
 local mainFrame = CreateFrame("Frame")
-mainFrame:RegisterEvent("PLAYER_LOGIN")
-mainFrame:SetScript("OnEvent", function(self, event, ...)
-    if event == "PLAYER_LOGIN" then
-        -- Initialize and Enable the addon
-        addon:Initialize()
-        addon:Enable()
+mainFrame:SetScript("OnEvent", function(selfFrame, event, arg1, ...)
+    if event == "ADDON_LOADED" then
+        if arg1 == ADDON_NAME then
+            ProdigyAuras:DebugPrint("Event: ADDON_LOADED for " .. arg1)
+        end
+    elseif event == "PLAYER_ENTERING_WORLD" then 
+        ProdigyAuras:DebugPrint("Event: PLAYER_ENTERING_WORLD (Arg1: " .. (arg1 and tostring(arg1) or "nil") .. ")")
+        if not ProdigyAuras.metadataInitialized then
+             InitializeMetadata()
+        end
+        if not ProdigyAuras.isInitialized then
+            ProdigyAuras:Initialize()
+        end
+        if not ProdigyAuras.isEnabled then
+            ProdigyAuras:Enable()
+        end
         
-        -- Unregister PLAYER_LOGIN after first login to prevent re-initialization on /reload
-        -- unless explicitly needed for some re-initialization logic.
-        self:UnregisterEvent("PLAYER_LOGIN")
+        selfFrame:UnregisterEvent("PLAYER_ENTERING_WORLD")
     end
 end)
 
-DebugPrint("Core.lua cargado.")
+mainFrame:RegisterEvent("ADDON_LOADED")
+mainFrame:RegisterEvent("PLAYER_ENTERING_WORLD") 
+
+ProdigyAuras:DebugPrint("Core.lua procesado y eventos registrados (WoW 11.1.5).")

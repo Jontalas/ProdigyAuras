@@ -7,9 +7,9 @@ local addon = ProdigyAuras
 local ADDON_NAME = "ProdigyAuras" -- Must match .toc filename and folder name
 
 -- Initialize basic properties
-addon.title = ADDON_NAME -- Fallback, will be updated from .toc
-addon.version = "0.0.0-pre" -- Fallback, will be updated from .toc
-addon.author = "Jontalas" -- Fallback, will be updated from .toc
+addon.title = ADDON_NAME
+addon.version = "0.0.0-pre"
+addon.author = "Jontalas"
 addon.isInitialized = false
 addon.isEnabled = false
 addon.metadataInitialized = false
@@ -22,21 +22,20 @@ end
 local function InitializeMetadata()
     if addon.metadataInitialized then return end
 
-    addon:DebugPrint("Attempting to initialize metadata (WoW 11.1.5)...")
+    -- addon:DebugPrint("Attempting to initialize metadata (WoW 11.1.5)...") -- Kept for deeper debugging if needed
 
     local getMetadataFunc
     if C_AddOns and C_AddOns.GetAddOnMetadata then
         getMetadataFunc = C_AddOns.GetAddOnMetadata
-        addon:DebugPrint("Using C_AddOns.GetAddOnMetadata.")
+        -- addon:DebugPrint("Using C_AddOns.GetAddOnMetadata.") -- Kept for deeper debugging
     else
-        -- This fallback is unlikely to be needed or work correctly in 11.1.5 if C_AddOns itself is missing.
         getMetadataFunc = GetAddOnMetadata 
         addon:DebugPrint("Warning: C_AddOns.GetAddOnMetadata not found. Attempting global GetAddOnMetadata (not recommended for 11.1.5).")
     end
 
     if not getMetadataFunc then
         addon:DebugPrint("Critical Error: No GetAddOnMetadata function available.")
-        addon.metadataInitialized = true -- Mark as initialized to prevent retries, but with errors.
+        addon.metadataInitialized = true
         return
     end
 
@@ -65,20 +64,20 @@ local function InitializeMetadata()
          if not successAuthor then addon:DebugPrint("pcall error (Author): " .. tostring(authorOrError)) end
     end
 
-    addon:DebugPrint("Metadata initialization complete. Version: " .. addon.version .. ", Title: " .. addon.title .. ", Author: " .. addon.author)
+    addon:DebugPrint("Metadata initialized. Version: " .. addon.version) -- Simplified confirmation
     addon.metadataInitialized = true
 end
 
 function addon:Initialize()
     if self.isInitialized then return end
-    self:DebugPrint("Initializing " .. self.title .. " (core logic)...")
+    self:DebugPrint(self.title .. " initializing (core logic)...")
     self.isInitialized = true
     self:DebugPrint(self.title .. " core logic initialized.")
 end
 
 function addon:Enable()
     if self.isEnabled then return end
-    self:DebugPrint("Enabling " .. self.title .. "...")
+    self:DebugPrint(self.title .. " enabling...")
     
     SLASH_PRODIGYAURAS1 = "/prodigyauras"
     SLASH_PRODIGYAURAS2 = "/pa"
@@ -95,7 +94,7 @@ function addon:Enable()
         end
     end
     
-    self:DebugPrint(self.title .. " enabled and slash commands registered.")
+    self:DebugPrint(self.title .. " enabled.")
     self.isEnabled = true
 end
 
@@ -103,13 +102,19 @@ local mainFrame = CreateFrame("Frame")
 mainFrame:SetScript("OnEvent", function(selfFrame, event, arg1, ...)
     if event == "ADDON_LOADED" then
         if arg1 == ADDON_NAME then
-            ProdigyAuras:DebugPrint("Event: ADDON_LOADED for " .. arg1)
+            -- Initial ADDON_LOADED for self is a good point to know the file is processed
+            -- but most initialization happens at PLAYER_ENTERING_WORLD.
+            -- ProdigyAuras:DebugPrint("Event: ADDON_LOADED for " .. arg1) -- Removed for cleaner console
         end
     elseif event == "PLAYER_ENTERING_WORLD" then 
-        ProdigyAuras:DebugPrint("Event: PLAYER_ENTERING_WORLD (Arg1: " .. (arg1 and tostring(arg1) or "nil") .. ")")
+        -- ProdigyAuras:DebugPrint("Event: PLAYER_ENTERING_WORLD") -- Removed for cleaner console
+        
         if not ProdigyAuras.metadataInitialized then
              InitializeMetadata()
         end
+
+        ProdigyAuras:InitializeDB() -- Initialize the configuration database
+
         if not ProdigyAuras.isInitialized then
             ProdigyAuras:Initialize()
         end
@@ -124,4 +129,4 @@ end)
 mainFrame:RegisterEvent("ADDON_LOADED")
 mainFrame:RegisterEvent("PLAYER_ENTERING_WORLD") 
 
-ProdigyAuras:DebugPrint("Core.lua procesado y eventos registrados (WoW 11.1.5).")
+-- ProdigyAuras:DebugPrint("Core.lua procesado y eventos registrados.") -- Removed for cleaner console

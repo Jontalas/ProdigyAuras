@@ -1,0 +1,28 @@
+## Interface: 110100
+## Title: ProdigyAuras
+## Author: Jontalas
+## Version: 0.1.0
+## Notes: Intelligent rotation assistant and utility addon. |cffeda55fProdigyAuras|r
+## SavedVariables: ProdigyAurasDB
+
+## Core files
+Core/Core.lua
+Core/Events.lua
+Core/Config.lua
+Core/Utils.lua
+
+# Modules (inicialmente comentados, los descomentaremos a medida que los creemos)
+# Modules/Rotations/RotationEngine.lua
+# Modules/Rotations/SimcParser.lua
+# Modules/Rotations/Classes/Common.lua
+# Modules/Display/IconManager.lua
+# Modules/Display/TextDisplay.lua
+# Modules/Display/FrameManager.lua
+# Modules/Utilities/BuffReminder.lua
+# Modules/Utilities/ConsumableReminder.lua
+# Modules/Utilities/TalentReminder.lua
+# Modules/Integrations/BigWigsListener.lua
+
+# Locales (inicialmente comentados)
+# Locales/enUS.lua
+# Locales/esES.lua

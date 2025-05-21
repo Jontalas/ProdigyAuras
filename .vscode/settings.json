@@ -7,6 +7,8 @@
         "CreateFrame",
         "UnitClass",
         "GetSpecialization",
-        "GetSpecializationInfo"
+        "GetSpecializationInfo",
+        "UIParent",
+        "C_Spell"
     ]
 }

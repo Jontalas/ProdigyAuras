@@ -17,6 +17,7 @@ Core/Utils.lua
 
 ## Modules
 Modules/Display/FrameManager.lua 
+Modules/Display/IconManager.lua
 # Modules/Rotations/RotationEngine.lua
 # Modules/Rotations/SimcParser.lua
 # Modules/Rotations/Classes/Common.lua

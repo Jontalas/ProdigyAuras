@@ -59,4 +59,9 @@ ProdigyAuras.L_DATA["esES"] = {
     LOC_ERR_CREATE_TEST_FRAME_NOT_FOUND = "Error: Función CreateTestFrame no encontrada.",
     LOC_ERR_TOGGLE_TEST_FRAME_NOT_FOUND = "Error: Función ToggleTestFrame no encontrada.",
     LOC_ERR_PROFILE_DB_NOT_INIT_TOGGLE = "Error: Base de datos del perfil no inicializada para ToggleTestFrame.",
+
+    -- IconManager.lua
+    L_ICONMANAGER_LOADED = "IconManager.lua cargado.",
+    L_TEST_ICON_CREATED = "Icono de prueba creado para el hechizo ID: %s.",
+    L_ICON_UPDATED = "Icono actualizado para el hechizo ID: %s.",
 }

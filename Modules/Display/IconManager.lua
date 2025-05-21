@@ -120,24 +120,42 @@ function addon:CreateTestDisplayIcon(parentFrame)
         return
     end
 
-    -- Check if test icon already exists to prevent duplicates on multiple calls
     if addon.icons["TestSpellIcon1"] then
-        addon.icons["TestSpellIcon1"]:ApplySettings() -- Re-apply settings if it exists
-        return addon.icons["TestSpellIcon1"]
+        -- If icon already exists, re-apply settings and potentially re-trigger test cooldown
+        local existingIcon = addon.icons["TestSpellIcon1"]
+        existingIcon:ApplySettings()
+        
+        -- >>> AÑADIR/MODIFICAR ESTA PARTE PARA PROBAR EL COOLDOWN <<<
+        local testSpellID = 133
+        local exampleStacks = 3
+        local exampleKeybind = "1"
+        local exampleCooldownStartTime = GetTime() - 7 -- Cooldown de 10s, empezó hace 7 segundos (quedan 3s)
+        local exampleCooldownDuration = 10
+        
+        existingIcon:Update(testSpellID, exampleCooldownStartTime, exampleCooldownDuration, exampleStacks, exampleKeybind)
+        addon:DebugPrint("L_TEST_ICON_CREATED", tostring(testSpellID) .. " (existing, cooldown test updated)") -- Modificar o añadir loc key
+        return existingIcon
     end
     
     local testSpellID = 133 -- Fireball
-    -- Position it in the center of the parent frame (which is ProdigyAurasTestFrame)
     local iconPos = { point = "CENTER", relativeTo = parentFrame, relativePoint = "CENTER", xOfs = 0, yOfs = 0 }
     
     local testIcon = self:CreateIconObject("TestSpellIcon1", parentFrame, testSpellID, iconPos)
     
     if testIcon then
-        self:DebugPrint("L_TEST_ICON_CREATED", tostring(testSpellID))
-        -- Example of setting a cooldown (starts a 5s cooldown that began 2s ago)
-        -- testIcon:Update(testSpellID, GetTime() - 2, 5, 3, "1") -- Spell, StartTime, Duration, Stacks, Keybind
+        -- >>> AÑADIR/MODIFICAR ESTA PARTE PARA PROBAR EL COOLDOWN <<<
+        local exampleStacks = 3 -- Para probar el texto de stacks también
+        local exampleKeybind = "1" -- Para probar el texto de keybind
+        local exampleCooldownStartTime = GetTime() - 7 -- Cooldown de 10s, empezó hace 7 segundos (quedan 3s)
+        local exampleCooldownDuration = 10
+
+        -- Llamamos a Update con los datos de prueba para el cooldown, stacks y keybind
+        testIcon:Update(testSpellID, exampleCooldownStartTime, exampleCooldownDuration, exampleStacks, exampleKeybind)
+        
+        self:DebugPrint("L_TEST_ICON_CREATED", tostring(testSpellID) .. " (cooldown test initiated)") -- Modificar o añadir loc key
     end
     return testIcon
 end
+
 
 addon:DebugPrint("L_ICONMANAGER_LOADED")
